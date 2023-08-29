@@ -17,7 +17,7 @@
  */
 define([
     "require",
-    "hbs!tmpl/search/tree/ClassificationTreeLayoutView_tmpl",
+    "hbs!tmpl/search/tree/DataStandardsTreeLayoutView_tmpl",
     "utils/Utils",
     "utils/Messages",
     "utils/Globals",
@@ -28,11 +28,11 @@ define([
     "utils/Enums",
     "collection/VTagList",
     "jstree"
-], function(require, ClassificationTreeLayoutViewTmpl, Utils, Messages, Globals, UrlLinks, CommonViewFunction, VSearchList, VGlossaryList, Enums, VTagList) {
+], function(require, DataStandardsTreeLayoutViewTmpl, Utils, Messages, Globals, UrlLinks, CommonViewFunction, VSearchList, VGlossaryList, Enums, VTagList) {
     "use strict";
 
     var ClassificationTreeLayoutView = Marionette.LayoutView.extend({
-        template: ClassificationTreeLayoutViewTmpl,
+        template: DataStandardsTreeLayoutViewTmpl,
 
         regions: {},
         ui: {
@@ -517,15 +517,15 @@ define([
                     var tagData = that.isEmptyClassification ? dataWithoutEmptyTag : data;
                     return tagData;
                 }
+            console.log('collection---', collection);
             collection.each(function(model) {
-                var modelJSON = model.toJSON();
-                if(!(modelJSON.options && modelJSON.options.app_catalog_ === 'app_catalog_standard')) {
+                var modelJSON = model.toJSON()
+                if(modelJSON.options && modelJSON.options.app_catalog_ === 'app_catalog_standard') {
                     var name = modelJSON.name,
                         tagEntityCount = that.entityCountObj ? that.entityCountObj.tag.tagEntities[name] : null,
                         tagname = tagEntityCount ? name + " (" + _.numberFormatWithComma(tagEntityCount) + ")" : name,
                         isSelectedChildted = false,
                         isSelected = false;
-    
                     if (that.options.value) {
                         isSelected = that.options.value.tag ? that.options.value.tag == name : false;
                         if (!that.tagId) {
@@ -573,7 +573,10 @@ define([
             var classificationData = that.isGroupView ?
                 that.pushRootClassificationToJstree.call(that, classificationTreeData) :
                 that.pushRootClassificationToJstree.call(that, flatViewClassificaton);
-            return classificationData;
+            var list = classificationData.filter(item => {
+                return !['_ALL_CLASSIFICATION_TYPES', '_CLASSIFIED', '_NOT_CLASSIFIED'].includes(item.name)
+            })
+            return list;
         },
         pushRootClassificationToJstree: function(data) {
             var that = this;
@@ -799,7 +802,10 @@ define([
                     name: name.trim(),
                     description: description.trim(),
                     superTypes: superTypes.length ? superTypes : [],
-                    attributeDefs: attributeObj
+                    attributeDefs: attributeObj,
+                    options: {
+                        "app_catalog_" : "app_catalog_standard"
+                    },
                 }],
                 entityDefs: [],
                 enumDefs: [],

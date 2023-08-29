@@ -165,7 +165,7 @@ define(["require",
             renderSearchLayoutView: function() {
                 var that = this;
                 require(["views/search/AdvanceSearchLayoutView"], function(AdvanceSearchLayoutView) {
-                    that.RSearchLayoutView.show(
+                    that.RSearchLayoutView && that.RSearchLayoutView.show(
                         new AdvanceSearchLayoutView(
                             _.extend({
                                     isHeaderSearch: true,

@@ -35,6 +35,7 @@ define([
             // RSaveSearchBasic: '[data-id="r_saveSearchBasic"]',
             RGlossaryTreeRender: '[data-id="r_glossaryTreeRender"]',
             RClassificationTreeRender: '[data-id="r_classificationTreeRender"]',
+            RDataStandardsTreeRender: '[data-id="r_dataStandardsTreeRender"]',
             REntityTreeRender: '[data-id="r_entityTreeRender"]',
             RCustomFilterTreeRender: '[data-id="r_customFilterTreeRender"]',
             RBusinessMetadataTreeRender: '[data-id="r_businessMetadataTreeRender"]',
@@ -121,6 +122,7 @@ define([
             var opt = Utils.getUrlState.getQueryParams();
             this.renderEntityTree(opt);
             this.renderClassificationTree(opt);
+            this.renderDatastandardsTree(opt);
             this.renderGlossaryTree(opt);
             this.renderCustomFilterTree();
             this.renderBusinessMetadataTree();
@@ -230,6 +232,12 @@ define([
             var that = this;
             require(["views/search/tree/ClassificationTreeLayoutView"], function(ClassificationTreeLayoutView) {
                 that.RClassificationTreeRender.show(new ClassificationTreeLayoutView(_.extend({ query: that.query }, that.options, { value: opt })));
+            });
+        },
+        renderDatastandardsTree: function(opt) {
+            var that = this;
+            require(["views/search/tree/DatastandardsTreeLayoutView"], function(ClassificationTreeLayoutView) {
+                that.RDataStandardsTreeRender.show(new ClassificationTreeLayoutView(_.extend({ query: that.query }, that.options, { value: opt })));
             });
         },
         renderGlossaryTree: function(opt) {

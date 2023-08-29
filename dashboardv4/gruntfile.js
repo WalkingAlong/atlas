@@ -51,7 +51,7 @@ module.exports = function(grunt) {
         connect: {
             server: {
                 options: {
-                    port: 9999,
+                    port: 9988,
                     base: distPath,
                     // change this to '0.0.0.0' to access the server from outside
                     hostname: '0.0.0.0',
@@ -62,7 +62,7 @@ module.exports = function(grunt) {
                 },
                 proxies: [{
                     context: '/api', // the context of the data service
-                    host: '127.0.0.1',
+                    host: '192.168.100.133',
                     auth: "admin:admin",
                     port: 21000, // the port that the data service is running on
                     https: false
