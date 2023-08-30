@@ -37,25 +37,25 @@ define([
         regions: {},
         ui: {
             //refresh
-            refreshTree: '[data-id="refreshTree"]',
-            groupOrFlatTree: '[data-id="groupOrFlatTreeView"]',
+            refreshTree: '[data-id="refreshTree2"]',
+            groupOrFlatTree: '[data-id="groupOrFlatTreeView2"]',
 
             // menuItems: '.menu-items>ul>li',
 
             // tree el
-            classificationSearchTree: '[data-id="classificationSearchTree"]',
+            classificationSearchTree: '[data-id="classificationSearchTree2"]',
 
             // Show/hide empty values in tree
-            showEmptyClassifications: '[data-id="showEmptyClassifications"]',
+            showEmptyClassifications: '[data-id="showEmptyClassifications2"]',
 
             // Create
-            createTag: '[data-id="createTag"]',
-            wildCardClick: '[data-id="wildCardClick"]',
-            wildCardSearch: '[data-id="wildCardSearch"]',
-            wildCardValue: '[data-id="wildCardValue"]',
-            wildCardContainer: '[data-id="wildCardContainer"]',
-            clearWildCard: '[data-id="clearWildCard"]',
-            classificationTreeLoader: '[data-id="classificationTreeLoader"]'
+            createTag: '[data-id="createTag2"]',
+            wildCardClick: '[data-id="wildCardClick2"]',
+            wildCardSearch: '[data-id="wildCardSearch2"]',
+            wildCardValue: '[data-id="wildCardValue2"]',
+            wildCardContainer: '[data-id="wildCardContainer2"]',
+            clearWildCard: '[data-id="clearWildCard2"]',
+            classificationTreeLoader: '[data-id="classificationTreeLoader2"]'
         },
         templateHelpers: function() {
             return {
@@ -151,7 +151,8 @@ define([
                     "classificationDefCollection",
                     "searchTableColumns",
                     "searchTableFilters",
-                    "metricCollection"
+                    "metricCollection",
+                    "businessMetadataDefCollection"
                 )
             );
             this.bindEvents();
@@ -217,8 +218,8 @@ define([
                 },
                 this
             );
-            $('body').on('click', '.classificationPopoverOptions li', function(e) {
-                that.$('.classificationPopover').popover('hide');
+            $('body').on('click', '.classificationPopoverOptions2 li', function(e) {
+                that.$('.classificationPopover2').popover('hide');
                 that[$(this).find('a').data('fn') + "Classification"](e)
             });
             this.searchVent.on("Classification:Count:Update", function(options) {
@@ -283,16 +284,16 @@ define([
             var that = this;
             Utils.generatePopover({
                 el: this.$el,
-                contentClass: 'classificationPopoverOptions',
+                contentClass: 'classificationPopoverOptions2',
                 popoverOptions: {
-                    selector: '.classificationPopover',
+                    selector: '.classificationPopover2',
                     content: function() {
                         var name = this.dataset.name || null,
-                            searchString = "<li><i class='fa fa-search'></i><a href='javascript:void(0)' data-fn='onSelectedSearch'>Search</a></li>";
+                            searchString = "<li><i class='fa fa-search'></i><a href='javascript:void(0)' data-fn='onSelectedSearch2'>搜索</a></li>";
                         if (name && Enums.addOnClassification.includes(name)) {
                             return "<ul>" + searchString + "</ul>";
                         } else {
-                            var liString = " <li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateTag'>Create Sub-classification</a></li><li><i class='fa fa-list-alt'></i><a href='javascript:void(0)' data-fn='onViewEdit'>View/Edit</a></li><li><i class='fa fa-trash-o'></i><a href='javascript:void(0)' data-fn='onDelete'>Delete</a></li>";
+                            var liString = " <li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateTag2'>Create Sub-classification</a></li><li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateZidian'>创建字典</a></li><li><i class='fa fa-list-alt'></i><a href='javascript:void(0)' data-fn='onViewEdit2'>View/Edit</a></li><li><i class='fa fa-trash-o'></i><a href='javascript:void(0)' data-fn='onDelete2'>删除</a></li>";
                             return "<ul>" + liString + searchString + "</ul>";
                         }
                     }
@@ -344,6 +345,9 @@ define([
             }
         },
         onNodeSelect: function(options) {
+            if (this.options.value === undefined) {
+                this.options.value = {};
+            }
             Globals.fromRelationshipSearch = false;
             if (this.classificationTreeUpdate) {
                 this.classificationTreeUpdate = false;
@@ -380,6 +384,7 @@ define([
                 tagValue = name;
                 params['tag'] = tagValue;
             } else {
+                console.log('params---',this.options, params)
                 that.options.value.tag = that.tagId = params["tag"] = null;
                 that.ui.classificationSearchTree.jstree(true).deselect_all(true);
                 if (!that.options.value.type && !that.options.value.tag && !that.options.value.term && !that.options.value.query) {
@@ -392,7 +397,7 @@ define([
             this.triggerSearch(searchParam);
         },
         triggerSearch: function(params, url) {
-            var serachUrl = url ? url : '#!/search/searchResult';
+            var serachUrl = url ? url : '#!/enumResult';
             Utils.setUrl({
                 url: serachUrl,
                 urlParams: params,
@@ -517,7 +522,6 @@ define([
                     var tagData = that.isEmptyClassification ? dataWithoutEmptyTag : data;
                     return tagData;
                 }
-            console.log('collection---', collection);
             collection.each(function(model) {
                 var modelJSON = model.toJSON()
                 if(modelJSON.options && modelJSON.options.app_catalog_ === 'app_catalog_standard') {
@@ -630,7 +634,7 @@ define([
                                 var aTag = $(el).find(">a.jstree-anchor"),
                                     nameText = aTag.text();
                                 aTag.append("<span class='tree-tooltip'>" + nameText + "</span>");
-                                $(el).append('<div class="tools"><i class="fa fa-ellipsis-h classificationPopover" rel="popover" data-name=' + nameText + '></i></div>');
+                                $(el).append('<div class="tools"><i class="fa fa-ellipsis-h classificationPopover2" rel="popover" data-name=' + nameText + '></i></div>');
                             }
                         },
                         core: {
@@ -682,7 +686,7 @@ define([
 
         onClickCreateTag: function(tagName) {
             var that = this;
-            require(["views/tag/CreateTagLayoutView", "modules/Modal"], function(CreateTagLayoutView, Modal) {
+            require(["views/tag/CreateTagLayoutView2", "modules/Modal"], function(CreateTagLayoutView, Modal) {
                 var view = new CreateTagLayoutView({ tagCollection: that.options.classificationDefCollection, enumDefCollection: enumDefCollection, selectedTag: tagName }),
                     modal = new Modal({
                         title: "Create a new classification",
@@ -709,6 +713,41 @@ define([
                 modal.on("ok", function() {
                     modal.$el.find("button.ok").showButtonLoader();
                     that.onCreateTagButton(view, modal);
+                });
+                modal.on("closeModal", function() {
+                    modal.trigger("cancel");
+                });
+            });
+        },
+        onClickCreateZidian: function(tagName) {
+            var that = this;
+            require(["views/tag/CreateZidianLayoutView", "modules/Modal"], function(CreateTagLayoutView, Modal) {
+                var view = new CreateTagLayoutView({ tagCollection: that.options.classificationDefCollection, enumDefCollection: enumDefCollection, selectedTag: tagName }),
+                    modal = new Modal({
+                        title: "创建字典",
+                        content: view,
+                        cancelText: "取消",
+                        okCloses: false,
+                        okText: "创建",
+                        allowCancel: true
+                    }).open();
+                modal.$el.find("button.ok").attr("disabled", "true");
+                view.ui.tagName.on('keyup input', function(e) {
+                    $(view.ui.description).trumbowyg('html', _.escape($(this).val()).replace(/\s+/g, ' '));
+                });
+                view.ui.description.on('input keydown', function(e) {
+                    $(this).val($(this).val().replace(/\s+/g, ' '));
+                });
+                modal.on("shownModal", function() {
+                    view.ui.parentTag.select2({
+                        multiple: true,
+                        placeholder: "Search Classification",
+                        allowClear: true
+                    });
+                });
+                modal.on("ok", function() {
+                    modal.$el.find("button.ok").showButtonLoader();
+                    that.onCreateZidianButton(view, modal);
                 });
                 modal.on("closeModal", function() {
                     modal.trigger("cancel");
@@ -839,20 +878,221 @@ define([
                 }
             });
         },
-        onClickCreateTagClassification: function(e) {
+        onCreateZidianButton: function(ref, modal) {
+            var that = this;
+            var validate = true;
+            if (modal.$el.find(".attributeInput").length > 0) {
+                modal.$el.find(".attributeInput").each(function() {
+                    if ($(this).val() === "") {
+                        $(this).css("borderColor", "red");
+                        validate = false;
+                    }
+                });
+            }
+            modal.$el.find(".attributeInput").keyup(function() {
+                $(this).css("borderColor", "#e8e9ee");
+                modal.$el.find("button.ok").removeAttr("disabled");
+            });
+            if (!validate) {
+                Utils.notifyInfo({
+                    content: "Please fill the attributes or delete the input box"
+                });
+                modal.$el.find("button.ok").hideButtonLoader();
+                return;
+            }
+
+            var name = ref.ui.tagName.val(),
+                description = Utils.sanitizeHtmlContent({ data: ref.ui.description.val() }),
+                superTypes = [],
+                nameCN = ref.ui.nameCN.val(),   // 中文名称
+                catalog = ref.ui.catalog.val(), // 字典目录
+                version = ref.ui.version.val(), // 版本号
+                parentTagVal = ref.ui.parentTag.val();
+            var showAttribute = ref.ui.showAttribute;
+            if (parentTagVal && parentTagVal.length) {
+                superTypes = parentTagVal;
+            }
+            var attributeObj = ref.collection.toJSON();
+            if (ref.collection.length === 1 && ref.collection.first().get("name") === "") {
+                attributeObj = [];
+            }
+
+            if (attributeObj.length) {
+                var superTypesAttributes = [];
+                _.each(superTypes, function(name) {
+                    var parentTags = that.options.classificationDefCollection.fullCollection.findWhere({ name: name });
+                    superTypesAttributes = superTypesAttributes.concat(parentTags.get("attributeDefs"));
+                });
+
+                var duplicateAttributeList = [];
+                _.each(attributeObj, function(obj) {
+                    var duplicateCheck = _.find(superTypesAttributes, function(activeTagObj) {
+                        return activeTagObj.name.toLowerCase() === obj.name.toLowerCase();
+                    });
+                    if (duplicateCheck) {
+                        duplicateAttributeList.push(_.escape(obj.name));
+                    }
+                });
+                var notifyObj = {
+                    modal: true,
+                    confirm: {
+                        confirm: true,
+                        buttons: [{
+                                text: "Ok",
+                                addClass: "btn-atlas btn-md",
+                                click: function(notice) {
+                                    notice.remove();
+                                }
+                            },
+                            null
+                        ]
+                    }
+                };
+                if (duplicateAttributeList.length) {
+                    if (duplicateAttributeList.length < 2) {
+                        var text = "Attribute <b>" + duplicateAttributeList.join(",") + "</b> is duplicate !";
+                    } else {
+                        if (attributeObj.length > duplicateAttributeList.length) {
+                            var text = "Attributes: <b>" + duplicateAttributeList.join(",") + "</b> are duplicate !";
+                        } else {
+                            var text = "All attributes are duplicate !";
+                        }
+                    }
+                    notifyObj["text"] = text;
+                    Utils.notifyConfirm(notifyObj);
+                    modal.$el.find("button.ok").hideButtonLoader();
+                    return false;
+                }
+            }
+            // this.json = {
+            //     classificationDefs: [{
+            //         name: name.trim(),
+            //         description: description.trim(),
+            //         superTypes: superTypes.length ? superTypes : [],
+            //         attributeDefs: attributeObj,
+            //         options: {
+            //             "app_catalog_" : "app_catalog_standard",
+            //             nameCN: nameCN,
+            //             version: version,
+            //             dict_catalog: catalog,
+            //             dict_status: ''
+            //         },
+            //     }],
+            //     entityDefs: [],
+            //     enumDefs: [],
+            //     structDefs: []
+            // };
+
+            var items = showAttribute.find('.item')
+            console.log('items===', items);
+            var elementDefs = [];
+            items.each((inx, item) => {
+                var key = $(item).find('.key').val()
+                var value = $(item).find('.value').val()
+                var obj ={
+                    "description": value,
+                    "ordinal": inx + 1,
+                    "value": key
+                }
+                elementDefs.push(obj);
+            })
+            this.json = {
+                "businessMetadataDefs": [],
+                "classificationDefs": [],
+                "entityDefs": [],
+                "enumDefs": [
+                    {
+                        "elementDefs": elementDefs,
+                        "category": "ENUM",
+                        "description": description.trim(),
+                        "name": name.trim(),
+                        "options" : {
+                            "app_catalog_" : "app_catalog_standard",
+                            "dict_catalog_" : superTypes[0] || "",
+                            "name_CN": nameCN,
+                            "dict_status": "string"
+                        },
+                        "serviceType": "base_standard",
+                        "typeVersion": "V1.0",
+                        "version": 1  
+                    }
+                ],
+                "relationshipDefs": [],
+                "structDefs": []
+            }
+
+            console.log('json----', this.json, attributeObj);
+            var apiObj = {
+                sort: false,
+                slient: true,
+                reset: true,
+                success: function(model, response) {
+                    Utils.notifySuccess({
+                        content: "添加成功"
+                    });
+                },
+                complete: function(model, status) {
+                    modal.close();
+                }
+            }
+
+            $.extend(apiObj, { contentType: "application/json", dataType: "json", data: JSON.stringify(this.json) });
+
+            this.businessMetadataDefCollection.constructor.nonCrudOperation.call(this, UrlLinks.typedefsUrl().defs, "POST", apiObj);
+
+
+            return;
+
+
+            new this.options.classificationDefCollection.model().set(this.json).save(null, {
+                success: function(model, response) {
+                    var classificationDefs = model.get("classificationDefs");
+                    that.createTag = true;
+                    if (classificationDefs[0]) {
+                        _.each(classificationDefs[0].superTypes, function(superType) {
+                            var superTypeModel = that.options.classificationDefCollection.fullCollection.find({ name: superType }),
+                                subTypes = [];
+                            if (superTypeModel) {
+                                subTypes = superTypeModel.get("subTypes");
+                                subTypes.push(classificationDefs[0].name);
+                                superTypeModel.set({ subTypes: _.uniq(subTypes) });
+                            }
+                        });
+                    }
+                    that.options.classificationDefCollection.fullCollection.add(classificationDefs);
+                    Utils.notifySuccess({
+                        content: "Classification " + name + Messages.getAbbreviationMsg(false, 'addSuccessMessage')
+                    });
+                    modal.trigger("cancel");
+                    modal.$el.find("button.ok").showButtonLoader();
+                    that.typeHeaders.fetch({ reset: true });
+                },
+                complete: function() {
+                    modal.$el.find("button.ok").hideButtonLoader();
+                }
+            });
+        },
+        onClickCreateTag2Classification: function(e) {
             var selectedNode = this.ui.classificationSearchTree.jstree("get_selected", true);
             if (selectedNode && selectedNode[0]) {
                 this.onClickCreateTag(selectedNode[0].original.name);
             }
         },
-        onViewEditClassification: function() {
+        // 创建字典
+        onClickCreateZidianClassification: function(e) {
+            var selectedNode = this.ui.classificationSearchTree.jstree("get_selected", true);
+            if (selectedNode && selectedNode[0]) {
+                this.onClickCreateZidian(selectedNode[0].original.name);
+            }
+        },
+        onViewEdit2Classification: function() {
             var selectedNode = this.ui.classificationSearchTree.jstree("get_selected", true);
             if (selectedNode && selectedNode[0]) {
                 var url = "#!/tag/tagAttribute/" + selectedNode[0].original.name + "?tag=" + selectedNode[0].original.name;
                 this.onClassificationUpdate(url);
             }
         },
-        onDeleteClassification: function() {
+        onDelete2Classification: function() {
             var that = this,
                 notifyObj = {
                     modal: true,
@@ -864,11 +1104,11 @@ define([
                     okCloses: false,
                     cancel: function(argument) {}
                 };
-            var text = "Are you sure you want to delete the classification";
+            var text = "是否确定删除该标准";
             notifyObj["text"] = text;
             Utils.notifyConfirm(notifyObj);
         },
-        onSelectedSearchClassification: function() {
+        onSelectedSearch2Classification: function() {
             var params = {
                 searchType: "basic",
                 dslChecked: false,
@@ -900,7 +1140,7 @@ define([
                             // if deleted tag is prviously searched then remove that tag url from save state of tab.
                             var searchUrl = Globals.saveApplicationState.tabState.searchUrl,
                                 urlObj = Utils.getUrlState.getQueryParams(searchUrl) ? Utils.getUrlState.getQueryParams(searchUrl) : Utils.getUrlState.getQueryParams();
-                            that.classificationDefCollection.fullCollection.remove(deleteTagData);
+                            // that.classificationDefCollection.fullCollection && that.classificationDefCollection.fullCollection.remove && that.classificationDefCollection.fullCollection.remove(deleteTagData);
                             // to update tag list of search tab fetch typeHeaders.
                             //that.typeHeaders.fetch({ reset: true });
                             that.ui.classificationSearchTree.jstree(true).refresh();

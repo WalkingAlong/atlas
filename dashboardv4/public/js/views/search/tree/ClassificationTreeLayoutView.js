@@ -344,6 +344,9 @@ define([
             }
         },
         onNodeSelect: function(options) {
+            if (this.options.value === undefined) {
+                this.options.value = {};
+            }
             Globals.fromRelationshipSearch = false;
             if (this.classificationTreeUpdate) {
                 this.classificationTreeUpdate = false;
@@ -894,8 +897,8 @@ define([
                             // if deleted tag is prviously searched then remove that tag url from save state of tab.
                             var searchUrl = Globals.saveApplicationState.tabState.searchUrl,
                                 urlObj = Utils.getUrlState.getQueryParams(searchUrl) ? Utils.getUrlState.getQueryParams(searchUrl) : Utils.getUrlState.getQueryParams();
-                            that.classificationDefCollection.fullCollection.remove(deleteTagData);
-                            // to update tag list of search tab fetch typeHeaders.
+                            // that.classificationDefCollection.fullCollection && that.classificationDefCollection.fullCollection.remove && that.classificationDefCollection.fullCollection.remove(deleteTagData);
+                                // to update tag list of search tab fetch typeHeaders.
                             //that.typeHeaders.fetch({ reset: true });
                             that.ui.classificationSearchTree.jstree(true).refresh();
                             delete urlObj.tag;

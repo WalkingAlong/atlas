@@ -53,6 +53,7 @@ define([
             //Audit table
             '!/administrator': 'administrator',
             '!/administrator/businessMetadata/:id': 'businessMetadataDetailPage',
+            "!/enumResult": "enumResult",
             //Debug Metrics
             '!/debugMetrics': 'debugMetrics',
             // Default
@@ -500,6 +501,24 @@ define([
                     }
                 });
                 App.rContent.show(new AdministratorLayoutView(_.extend({ value: paramObj, guid: null }, options)));
+            });
+        },
+        enumResult: function() {
+            var that = this;
+            require(["views/site/Header", "views/site/SideNavLayoutView", 'views/enum/EnumResultLayoutView'], function(Header, SideNavLayoutView, EnumResultLayoutView) {
+                var paramObj = Utils.getUrlState.getQueryParams(),
+                    options = _.extend({}, that.preFetchedCollectionLists, that.sharedObj, that.ventObj);
+                that.renderViewIfNotExists(that.getHeaderOptions(Header));
+                that.renderViewIfNotExists({
+                    view: App.rSideNav,
+                    manualRender: function() {
+                        this.view.currentView.manualRender(options);
+                    },
+                    render: function() {
+                        return new SideNavLayoutView(options);
+                    }
+                });
+                App.rContent.show(new EnumResultLayoutView(_.extend({ value: paramObj, guid: null }, options)));
             });
         },
         debugMetrics: function() {

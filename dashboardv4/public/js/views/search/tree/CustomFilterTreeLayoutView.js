@@ -193,7 +193,7 @@ define([
                 this.options.value = {};
             }
             if (!this.options.value.isCF) {
-                this.ui.customFilterSearchTree.jstree(true).deselect_all();
+                this.ui.customFilterSearchTree.jstree(true).deselect_all && this.ui.customFilterSearchTree.jstree(true).deselect_all();
                 this.customFilterId = null;
             }
 

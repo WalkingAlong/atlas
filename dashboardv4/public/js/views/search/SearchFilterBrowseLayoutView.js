@@ -73,19 +73,22 @@ define([
                 }
                 this.entitySearchTree = this.$('[data-id="entitySearchTree"]');
                 this.classificationSearchTree = this.$('[data-id="classificationSearchTree"]');
+                this.classificationSearchTree2 = this.$('[data-id="classificationSearchTree2"]');
                 this.termSearchTree = this.$('[data-id="termSearchTree"]');
                 this.customFilterSearchTree = this.$('[data-id="customFilterSearchTree"]');
                 this.businessMetadataSearchTree = this.$('[data-id="businessMetadataSearchTree"]');
                 this.RelationshipSearchTree = this.$('[data-id="relationshipSearchTree"]');
-                this.entitySearchTree.jstree(true).show_all();
+                this.entitySearchTree.jstree(true).show_all && this.entitySearchTree.jstree(true).show_all();
                 this.entitySearchTree.jstree("search", searchString);
-                this.classificationSearchTree.jstree(true).show_all();
+                this.classificationSearchTree.jstree(true).show_all && this.classificationSearchTree.jstree(true).show_all();
                 this.classificationSearchTree.jstree("search", searchString);
-                this.termSearchTree.jstree(true).show_all();
+                this.classificationSearchTree2.jstree(true).show_all && this.classificationSearchTree2.jstree(true).show_all();
+                this.classificationSearchTree2.jstree("search", searchString);
+                this.termSearchTree.jstree(true).show_all && this.termSearchTree.jstree(true).show_all();
                 this.termSearchTree.jstree("search", searchString);
-                this.customFilterSearchTree.jstree(true).show_all();
+                this.customFilterSearchTree.jstree(true).show_all && this.customFilterSearchTree.jstree(true).show_all();
                 this.customFilterSearchTree.jstree("search", searchString);
-                this.businessMetadataSearchTree.jstree(true).show_all();
+                this.businessMetadataSearchTree.jstree(true).show_all && this.businessMetadataSearchTree.jstree(true).show_all();
                 this.businessMetadataSearchTree.jstree("search", searchString);
                 this.$(".panel-heading.dash-button-icon").removeClass("collapsed").attr("aria-expanded", true);
                 this.$(".panel-collapse.collapse").addClass("in").attr("aria-expanded", true).css({ height: "auto" });
