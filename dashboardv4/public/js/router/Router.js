@@ -54,6 +54,10 @@ define([
             '!/administrator': 'administrator',
             '!/administrator/businessMetadata/:id': 'businessMetadataDetailPage',
             "!/enumResult": "enumResult",
+            "!/enumMetaResult": function() {
+                this.enumMetaResult({ fromSearchResultView: true });
+            },
+
             //Debug Metrics
             '!/debugMetrics': 'debugMetrics',
             // Default
@@ -519,6 +523,130 @@ define([
                     }
                 });
                 App.rContent.show(new EnumResultLayoutView(_.extend({ value: paramObj, guid: null }, options)));
+            });
+        },
+        enumMetaResult: function(opt) {
+            var that = this;
+            require(["views/site/Header", "views/enum/SearchDefaultLayoutView", "views/site/SideNavLayoutView", "collection/VTagList"], function(Header, SearchDefaultLayoutView, SideNavLayoutView, VTagList) {
+                var paramObj = Utils.getUrlState.getQueryParams();
+                tag = new VTagList();
+                if (opt && opt.isRelationshipSearch) {
+                    paramObj = _.pick(paramObj, ["relationshipName", "searchType", "isCF", "relationshipFilters", "attributes", "uiParameters", "pageLimit", "pageOffset"]);
+                } else {
+                    if (paramObj && paramObj.relationshipName) {
+                        paramObj = _.omit(paramObj, ["relationshipName", "relationshipFilters", "attributes"]);
+                    } else {
+                        paramObj = _.omit(paramObj, ["relationshipName"]);
+                    }
+                }
+                if (paramObj) {
+                    if (!paramObj.type) {
+                        if (paramObj.entityFilters) {
+                            paramObj.entityFilters = null;
+                        }
+                    }
+                    if (!paramObj.relationshipName) {
+                        if (paramObj.relationshipFilters) {
+                            paramObj.relationshipFilters = null;
+                        }
+                    }
+                    if (!paramObj.tag) {
+                        if (paramObj.tagFilters) {
+                            paramObj.tagFilters = null;
+                        }
+                        renderSearchView();
+                    } else {
+                        var tagValidate = paramObj.tag,
+                            isTagPresent = false;
+                        if ((tagValidate.indexOf('*') == -1)) {
+                            classificationDefCollection.fullCollection.each(function(model) {
+                                var name = Utils.getName(model.toJSON(), 'name');
+                                if (model.get('category') == 'CLASSIFICATION') {
+                                    if (tagValidate) {
+                                        if (name === tagValidate) {
+                                            isTagPresent = true;
+                                        }
+                                    }
+                                }
+                            });
+                            _.each(Enums.addOnClassification, function(classificationName) {
+                                if (classificationName === tagValidate) {
+                                    isTagPresent = true;
+                                }
+                            });
+                            if (!isTagPresent) {
+                                tag.url = UrlLinks.classificationDefApiUrl(tagValidate);
+                                tag.fetch({
+                                    success: function(tagCollection) {
+                                        isTagPresent = true;
+                                    },
+                                    cust_error: function(model, response) {
+                                        paramObj.tag = null;
+                                    },
+                                    complete: function() {
+                                        renderSearchView.call();
+                                    }
+                                });
+                            } else {
+                                renderSearchView();
+                            }
+                        } else {
+                            renderSearchView();
+                        }
+                    }
+                } else {
+                    renderSearchView();
+                }
+
+                function renderSearchView() {
+                    var isinitialView = true,
+                        isTypeTagNotExists = false,
+                        tempParam = _.extend({}, paramObj);
+                    if (paramObj) {
+                        isinitialView =
+                            (
+                                paramObj.type ||
+                                (paramObj.dslChecked == "true" ? "" : paramObj.tag || paramObj.term || paramObj.relationshipName) ||
+                                (paramObj.query ? paramObj.query.trim() : "")
+                            ).length === 0;
+                    }
+                    var options = _.extend({
+                            value: paramObj,
+                            initialView: isinitialView,
+                            fromDefaultSearch: opt ? (opt && !opt.fromSearchResultView) : true,
+                            fromSearchResultView: (opt && opt.fromSearchResultView) || false,
+                            fromCustomFilterView: (opt && opt.fromCustomFilterView) || false,
+                            isTypeTagNotExists: paramObj && (paramObj.type != tempParam.type || tempParam.tag != paramObj.tag)
+                        },
+                        that.preFetchedCollectionLists,
+                        that.sharedObj,
+                        that.ventObj
+                    );
+                    that.renderViewIfNotExists(
+                        that.getHeaderOptions(Header, {
+                            fromDefaultSearch: options.fromDefaultSearch
+                        })
+                    );
+                    that.renderViewIfNotExists({
+                        view: App.rSideNav,
+                        manualRender: function() {
+                            this.view.currentView.manualRender(options);
+                        },
+                        render: function() {
+                            return new SideNavLayoutView(options);
+                        }
+                    });
+                    that.renderViewIfNotExists({
+                        view: App.rContent,
+                        viewName: "SearchDefaultlLayoutView",
+                        manualRender: function() {
+                            this.view.currentView.manualRender(options);
+                        },
+                        render: function() {
+                            return new SearchDefaultLayoutView(options);
+                        }
+                    });
+                }
             });
         },
         debugMetrics: function() {

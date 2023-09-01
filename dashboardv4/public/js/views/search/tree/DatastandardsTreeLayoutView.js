@@ -293,7 +293,7 @@ define([
                         if (name && Enums.addOnClassification.includes(name)) {
                             return "<ul>" + searchString + "</ul>";
                         } else {
-                            var liString = " <li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateTag2'>Create Sub-classification</a></li><li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateZidian'>创建字典</a></li><li><i class='fa fa-list-alt'></i><a href='javascript:void(0)' data-fn='onViewEdit2'>View/Edit</a></li><li><i class='fa fa-trash-o'></i><a href='javascript:void(0)' data-fn='onDelete2'>删除</a></li>";
+                            var liString = " <li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateTag2'>Create Sub-classification</a></li><li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateYuan'>创建元数据</a></li><li><i class='fa fa-plus'></i><a href='javascript:void(0)' data-fn='onClickCreateZidian'>创建字典</a></li><li><i class='fa fa-list-alt'></i><a href='javascript:void(0)' data-fn='onViewEdit2'>View/Edit</a></li><li><i class='fa fa-trash-o'></i><a href='javascript:void(0)' data-fn='onDelete2'>删除</a></li>";
                             return "<ul>" + liString + searchString + "</ul>";
                         }
                     }
@@ -394,7 +394,24 @@ define([
                 }
             }
             var searchParam = _.extend({}, this.options.value, params);
-            this.triggerSearch(searchParam);
+            console.log('params---', searchParam);
+            if(searchParam.tag === '基础数据元') {
+                this.triggerBasicSearch(searchParam);
+            }else {
+                this.triggerSearch(searchParam);
+            }
+        },
+        triggerBasicSearch: function(params, url) {
+            var serachUrl = url ? url : '#!/enumMetaResult';
+            params.type = "hdfs_path";
+            params.tag = "";
+            Utils.setUrl({
+                url: serachUrl,
+                urlParams: params,
+                mergeBrowserUrl: false,
+                trigger: true,
+                updateTabState: true
+            });
         },
         triggerSearch: function(params, url) {
             var serachUrl = url ? url : '#!/enumResult';
@@ -713,6 +730,41 @@ define([
                 modal.on("ok", function() {
                     modal.$el.find("button.ok").showButtonLoader();
                     that.onCreateTagButton(view, modal);
+                });
+                modal.on("closeModal", function() {
+                    modal.trigger("cancel");
+                });
+            });
+        },
+        onClickCreateYuan: function(tagName) {
+            var that = this;
+            require(["views/tag/CreateYuanLayoutView", "modules/Modal"], function(CreateTagLayoutView, Modal) {
+                var view = new CreateTagLayoutView({ tagCollection: that.options.classificationDefCollection, enumDefCollection: enumDefCollection, selectedTag: tagName }),
+                    modal = new Modal({
+                        title: "创建元数据",
+                        content: view,
+                        cancelText: "取消",
+                        okCloses: false,
+                        okText: "创建",
+                        allowCancel: true
+                    }).open();
+                modal.$el.find("button.ok").attr("disabled", "true");
+                view.ui.tagName.on('keyup input', function(e) {
+                    $(view.ui.description).trumbowyg('html', _.escape($(this).val()).replace(/\s+/g, ' '));
+                });
+                view.ui.description.on('input keydown', function(e) {
+                    $(this).val($(this).val().replace(/\s+/g, ' '));
+                });
+                modal.on("shownModal", function() {
+                    view.ui.parentTag.select2({
+                        multiple: true,
+                        placeholder: "Search Classification",
+                        allowClear: true
+                    });
+                });
+                modal.on("ok", function() {
+                    modal.$el.find("button.ok").showButtonLoader();
+                    that.onCreateYuanButton(view, modal);
                 });
                 modal.on("closeModal", function() {
                     modal.trigger("cancel");
@@ -1040,6 +1092,130 @@ define([
 
             this.businessMetadataDefCollection.constructor.nonCrudOperation.call(this, UrlLinks.typedefsUrl().defs, "POST", apiObj);
 
+            return; // TODO: retuen
+
+            new this.options.classificationDefCollection.model().set(this.json).save(null, {
+                success: function(model, response) {
+                    var classificationDefs = model.get("classificationDefs");
+                    that.createTag = true;
+                    if (classificationDefs[0]) {
+                        _.each(classificationDefs[0].superTypes, function(superType) {
+                            var superTypeModel = that.options.classificationDefCollection.fullCollection.find({ name: superType }),
+                                subTypes = [];
+                            if (superTypeModel) {
+                                subTypes = superTypeModel.get("subTypes");
+                                subTypes.push(classificationDefs[0].name);
+                                superTypeModel.set({ subTypes: _.uniq(subTypes) });
+                            }
+                        });
+                    }
+                    that.options.classificationDefCollection.fullCollection.add(classificationDefs);
+                    Utils.notifySuccess({
+                        content: "Classification " + name + Messages.getAbbreviationMsg(false, 'addSuccessMessage')
+                    });
+                    modal.trigger("cancel");
+                    modal.$el.find("button.ok").showButtonLoader();
+                    that.typeHeaders.fetch({ reset: true });
+                },
+                complete: function() {
+                    modal.$el.find("button.ok").hideButtonLoader();
+                }
+            });
+        },
+        onCreateYuanButton: function(ref, modal) {
+            var that = this;
+            var validate = true;
+            if (modal.$el.find(".attributeInput").length > 0) {
+                modal.$el.find(".attributeInput").each(function() {
+                    if ($(this).val() === "") {
+                        $(this).css("borderColor", "red");
+                        validate = false;
+                    }
+                });
+            }
+            modal.$el.find(".attributeInput").keyup(function() {
+                $(this).css("borderColor", "#e8e9ee");
+                modal.$el.find("button.ok").removeAttr("disabled");
+            });
+            if (!validate) {
+                Utils.notifyInfo({
+                    content: "Please fill the attributes or delete the input box"
+                });
+                modal.$el.find("button.ok").hideButtonLoader();
+                return;
+            }
+
+            var yuanName = ref.ui.tagName.val(), // 数据元中文名称
+                xdName = ref.ui.xdName.val(),    // 限定名称
+                changdu = ref.ui.changdu.val(),  // 长度
+                yueshu = ref.ui.yueshu.val(),    // 约束
+                zhikongjian = ref.ui.zhikongjian.val(), // 值空间
+                jieshijuli = ref.ui.jieshijuli.val(),   // 解释举例
+                yinyongno = ref.ui.yinyongno.val(),     // 引用编号
+                yuanType = ref.ui.yuanType.val(),       // 类型
+                yuanTemplate = ref.ui.yuanTemplate.val(), // 所属模板
+                name = ref.ui.tagName.val(),
+                // description = Utils.sanitizeHtmlContent({ data: ref.ui.description.val() }),
+                superTypes = [],
+                nameCN = ref.ui.nameCN.val(),   // 中文名称
+                catalog = ref.ui.catalog.val(), // 字典目录
+                version = ref.ui.version.val(), // 版本号
+                parentTagVal = ref.ui.parentTag.val();
+            console.log('formjson---', {
+                yuanName,
+                xdName,
+                changdu,
+                yueshu,
+                zhikongjian,
+                jieshijuli,
+                yinyongno,
+                yuanType,
+                yuanTemplate,
+            })
+            this.json = {
+                "businessMetadataDefs": [],
+                "classificationDefs": [],
+                "entityDefs": [],
+                "enumDefs": [
+                    {
+                        "elementDefs": elementDefs,
+                        "category": "ENUM",
+                        "description": description.trim(),
+                        "name": name.trim(),
+                        "options" : {
+                            "app_catalog_" : "app_catalog_standard",
+                            "dict_catalog_" : superTypes[0] || "",
+                            "name_CN": nameCN,
+                            "dict_status": "string"
+                        },
+                        "serviceType": "base_standard",
+                        "typeVersion": "V1.0",
+                        "version": 1  
+                    }
+                ],
+                "relationshipDefs": [],
+                "structDefs": []
+            }
+
+            console.log('json----', this.json, attributeObj);
+            var apiObj = {
+                sort: false,
+                slient: true,
+                reset: true,
+                success: function(model, response) {
+                    Utils.notifySuccess({
+                        content: "添加成功"
+                    });
+                },
+                complete: function(model, status) {
+                    modal.close();
+                }
+            }
+
+            $.extend(apiObj, { contentType: "application/json", dataType: "json", data: JSON.stringify(this.json) });
+
+            this.businessMetadataDefCollection.constructor.nonCrudOperation.call(this, UrlLinks.typedefsUrl().defs, "POST", apiObj);
+
 
             return;
 
@@ -1078,7 +1254,12 @@ define([
                 this.onClickCreateTag(selectedNode[0].original.name);
             }
         },
-        // 创建字典
+        onClickCreateYuanClassification: function(e) {
+            var selectedNode = this.ui.classificationSearchTree.jstree("get_selected", true);
+            if (selectedNode && selectedNode[0]) {
+                this.onClickCreateYuan(selectedNode[0].original.name);
+            }
+        },
         onClickCreateZidianClassification: function(e) {
             var selectedNode = this.ui.classificationSearchTree.jstree("get_selected", true);
             if (selectedNode && selectedNode[0]) {

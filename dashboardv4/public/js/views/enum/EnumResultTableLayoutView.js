@@ -21,19 +21,19 @@ define(['require',
     'hbs!tmpl/enum/EnumResultTableLayoutView_tmpl',
     'utils/Utils',
     'utils/Messages'
-], function(require, Backbone, BusinessMetadataTableLayoutView_tmpl, Utils, Messages) {
+], function(require, Backbone, EnumResultTableLayoutView_tmpl, Utils, Messages) {
     'use strict';
 
     var BusinessMetadataTableLayoutView = Backbone.Marionette.LayoutView.extend(
         /** @lends BusinessMetadataTableLayoutView */
         {
-            _viewName: 'BusinessMetadataTableLayoutView',
+            _viewName: 'EnumResultTableLayoutView',
 
-            template: BusinessMetadataTableLayoutView_tmpl,
+            template: EnumResultTableLayoutView_tmpl,
 
             /** Layout sub regions */
             regions: {
-                RBusinessMetadataTableLayoutView: "#r_businessMetadataTableLayoutView",
+                REnumResultTableLayoutView: "#r_enumResultTableLayoutView",
                 RModal: "#r_modal"
             },
 
@@ -226,11 +226,11 @@ define(['require',
                     var cols = new Backgrid.Columns(that.getBusinessMetadataTableColumns());
                     console.log('cols---', cols, that.getBusinessMetadataTableColumns());
                     console.log('commonTableOptions---', that.commonTableOptions);
-                    that.RBusinessMetadataTableLayoutView.show(new TableLayout(_.extend({}, that.commonTableOptions, {
+                    that.REnumResultTableLayoutView.show(new TableLayout(_.extend({}, that.commonTableOptions, {
                         columns: cols
                     })));
                     if (!(that.businessMetadataDefCollection.models.length < that.limit)) {
-                        that.RBusinessMetadataTableLayoutView.$el.find('table tr').last().hide();
+                        that.REnumResultTableLayoutView.$el.find('table tr').last().hide();
                     }
 
                 });

@@ -1,0 +1,115 @@
+<!--
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+-->
+<div class="fontLoader">
+    <i class="fa fa-refresh fa-spin-custom"></i>
+</div>
+<form name="tagDefinitionform" class="hide form-horizontal" data-id="createYuanForm">
+    <div class="form-group">
+        <label class="control-label col-sm-2 {{#if create}}required{{/if}}" for="name">中文名称</label>
+        {{#if create}}
+        <div class="col-sm-10">
+            <input class="form-control" data-id="yuanName" placeholder="中文名称(必填)" autofocus />
+        </div>
+        {{else}}
+        <span class="ellipsis-with-margin control-label text-left col-sm-10" data-id="title3"></span> {{/if}}
+    </div>
+    <!-- <div class="form-group">
+        <label class="control-label col-sm-2 required" for="description">字典描述</label>
+        <div class="col-sm-10">
+            <textarea class="form-control customTextEditor" data-id="description3" value="{{description}}" placeholder="字典描述(必填)" ></textarea>
+        </div>
+    </div> -->
+    <!-- <div class="form-group">
+        <label class="control-label col-sm-2 required" for="catalog">字典目录</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="catalog3" value="{{catalog}}" placeholder="字典目录(必填)" />
+        </div>
+    </div> -->
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="xdName">限定名称</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="xdName" placeholder="限定名称(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="bianhao">编号</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="bianhao" placeholder="编号(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="changdu">长度</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="changdu" placeholder="长度(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="yueshu">约束</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="yueshu" placeholder="约束(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="zhikongjian">值空间</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="zhikongjian" placeholder="值空间(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="jieshijuli">解释/举例</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="jieshijuli" placeholder="解释/举例(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="yinyongno">引用编号</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="yinyongno" placeholder="引用编号(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="yuanType">类型</label>
+        <div class="col-sm-10">
+            <input class="form-control customTextEditor" data-id="yuanType" placeholder="类型(必填)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-2 required" for="yuanTemplate">所属模板</label>
+        <div class="col-sm-10">
+            <select class="form-control customTextEditor" data-id="yuanTemplate" placeholder="所属模板(必填)">
+                <option value="模板1">模板1</option>
+                <option value="模板2">模板2</option>
+            </select>
+            <div data-id="addYuanAttributeDiv">
+            </div>
+        </div>
+    </div>
+    {{#if create}}
+    <div class="form-group">
+        <div class="col-sm-12">
+            <p class="text-gray">Attributes define additional properties for the classification</p>
+            <select class="form-control" disabled="true" data-id="parentTagList3" multiple="multiple"></select>
+        </div>
+    </div>
+    <div class="form-group" style="display:none;">
+        <label class="col-sm-12">Attributes(optional)</label>
+        <div class="col-sm-12">
+            <button title="Add New Attribute" type="button" class="btn btn-action btn-sm" data-id="attributeData3"><i class="fa fa-plus"></i> Add New Attributes</button>
+        </div>
+    </div>
+    {{/if}}
+</form>
