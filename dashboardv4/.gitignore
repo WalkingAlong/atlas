@@ -18,6 +18,8 @@
 .bower-*/
 .idea/
 node_modules/
+node_modules.zip
+node_modules.7z
 public/js/libs/
 dist
 target/
