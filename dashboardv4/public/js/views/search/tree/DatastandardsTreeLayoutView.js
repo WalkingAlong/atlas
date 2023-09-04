@@ -487,6 +487,9 @@ define([
                         icon: "fa fa-tag",
                         gType: "Classification",
                     }
+                    if(nodeStructure.name === '基础数据元') {
+                        console.log('nodeStructure---', nodeStructure)
+                    }
                     return nodeStructure;
                 },
 
@@ -599,6 +602,173 @@ define([
             })
             return list;
         },
+        // TODO: 实体
+        getEntityTree: function() {
+            var that = this,
+                serviceTypeArr = [],
+                serviceTypeWithEmptyEntity = [],
+                type = "ENTITY",
+                entityTreeContainer = this.ui.entitytreeStructure,
+                generateTreeData = function(data) {
+                    that.typeHeaders.fullCollection.each(function(model) {
+                        var totalCount = 0,
+                            serviceType = model.toJSON().serviceType,
+                            isSelected = false,
+                            categoryType = model.toJSON().category,
+                            generateServiceTypeArr = function(entityCountArr, serviceType, children, entityCount) {
+                                if (that.isGroupView) {
+                                    if (entityCountArr[serviceType]) {
+                                        entityCountArr[serviceType]["children"].push(children);
+                                        entityCountArr[serviceType]["totalCounter"] = +entityCountArr[serviceType]["totalCounter"] + entityCount;
+                                    } else {
+                                        entityCountArr[serviceType] = [];
+                                        entityCountArr[serviceType]["name"] = serviceType;
+                                        entityCountArr[serviceType]["children"] = [];
+                                        entityCountArr[serviceType]["children"].push(children);
+                                        entityCountArr[serviceType]["totalCounter"] = entityCount;
+                                    }
+                                } else {
+                                    entityCountArr.push(children)
+                                }
+                            };
+                        if (!serviceType) {
+                            serviceType = "other_types";
+                        }
+                        if (categoryType == "ENTITY") {
+                            var entityCount = that.entityCountObj ?
+                                (that.entityCountObj.entity.entityActive[model.get("name")] || 0) +
+                                (that.entityCountObj.entity.entityDeleted[model.get("name")] || 0) : 0,
+                                modelname = entityCount ? model.get("name") + " (" + _.numberFormatWithComma(entityCount) + ")" : model.get("name");
+                            if (that.options.value) {
+                                isSelected = that.options.value.type ? that.options.value.type == model.get("name") : false;
+                                if (!that.typeId) {
+                                    that.typeId = isSelected ? model.get("guid") : null;
+                                }
+                            }
+
+                            var children = {
+                                text: _.escape(modelname),
+                                name: model.get("name"),
+                                type: model.get("category"),
+                                gType: "Entity",
+                                guid: model.get("guid"),
+                                id: model.get("guid"),
+                                model: model,
+                                parent: "#",
+                                icon: "fa fa-file-o",
+                                state: {
+                                    disabled: false,
+                                    selected: isSelected
+                                },
+                            };
+
+                            entityCount = _.isNaN(entityCount) ? 0 : entityCount;
+                            generateServiceTypeArr(serviceTypeArr, serviceType, children, entityCount);
+                            console.log('serviceTypeArr---', serviceTypeArr);
+                            if (entityCount) {
+                                generateServiceTypeArr(serviceTypeWithEmptyEntity, serviceType, children, entityCount);
+                            }
+                        }
+                    });
+
+                    var serviceTypeData = that.isEmptyServicetype ? serviceTypeWithEmptyEntity : serviceTypeArr;
+                    if (that.isGroupView) {
+                        var serviceDataWithRootEntity = pushRootEntityToJstree.call(that, 'group', serviceTypeData);
+                        return getParentsData.call(that, serviceDataWithRootEntity);
+                    } else {
+                        return pushRootEntityToJstree.call(that, null, serviceTypeData);
+                    }
+                },
+                pushRootEntityToJstree = function(type, data) {
+                    var rootEntity = Globals[Enums.addOnEntities[0]];
+                    var isSelected = this.options.value && this.options.value.type ? this.options.value.type == rootEntity.name : false;
+                    var rootEntityNode = {
+                        text: _.escape(rootEntity.name),
+                        name: rootEntity.name,
+                        type: rootEntity.category,
+                        gType: "Entity",
+                        guid: rootEntity.guid,
+                        id: rootEntity.guid,
+                        model: rootEntity,
+                        parent: "#",
+                        icon: "fa fa-file-o",
+                        state: {
+                            // disabled: entityCount == 0 ? true : false,
+                            selected: isSelected
+                        },
+                    };
+                    if (type === 'group') {
+                        if (data.other_types === undefined) {
+                            data.other_types = { name: "other_types", children: [] };
+                        }
+                        data.other_types.children.push(rootEntityNode);
+                    } else {
+                        data.push(rootEntityNode);
+                    }
+                    return data;
+                },
+                getParentsData = function(data) {
+                    var parents = Object.keys(data),
+                        treeData = [],
+                        withoutEmptyServiceType = [],
+                        treeCoreData = null,
+                        openEntityNodesState = function(treeDate) {
+                            if (treeDate.length == 1) {
+                                _.each(treeDate, function(model) {
+                                    model.state = { opened: true }
+                                })
+                            }
+                        },
+                        generateNode = function(children) {
+                            var nodeStructure = {
+                                text: "Service Types",
+                                children: children,
+                                icon: "fa fa-folder-o",
+                                type: "ENTITY",
+                                state: { opened: true },
+                                parent: "#"
+                            }
+                            return nodeStructure;
+                        };
+                    for (var i = 0; i < parents.length; i++) {
+
+                        var checkEmptyServiceType = false,
+                            getParrent = data[parents[i]],
+                            totalCounter = getParrent.totalCounter,
+                            textName = getParrent.totalCounter ? parents[i] + " (" + _.numberFormatWithComma(totalCounter) + ")" : parents[i],
+                            parent = {
+                                icon: "fa fa-folder-o",
+                                type: type,
+                                gType: "ServiceType",
+                                children: getParrent.children,
+                                text: _.escape(textName),
+                                name: data[parents[i]].name,
+                                id: i,
+                                state: { opened: true }
+                            };
+                        if (that.isEmptyServicetype) {
+                            if (data[parents[i]].totalCounter == 0) {
+                                checkEmptyServiceType = true;
+                            }
+                        }
+                        treeData.push(parent);
+                        if (!checkEmptyServiceType) {
+                            withoutEmptyServiceType.push(parent);
+                        }
+                    }
+                    that.entityTreeData = {
+                        withoutEmptyServiceTypeEntity: generateNode(withoutEmptyServiceType),
+                        withEmptyServiceTypeEntity: generateNode(treeData)
+                    };
+
+                    treeCoreData = that.isEmptyServicetype ? withoutEmptyServiceType : treeData;
+
+                    openEntityNodesState(treeCoreData);
+                    return treeCoreData;
+                };
+            return generateTreeData();
+        },
+        // TODO: 实体结束
         pushRootClassificationToJstree: function(data) {
             var that = this;
             _.each(Enums.addOnClassification, function(addOnClassification) {
@@ -658,6 +828,8 @@ define([
                             multiple: false,
                             data: function(node, cb) {
                                 if (node.id === "#") {
+                                    console.log('that.getClassificationTree()---', that.getClassificationTree());
+                                    console.log('that.getEntityTree()---', that.getEntityTree());
                                     cb(that.getClassificationTree());
                                 }
                             }
