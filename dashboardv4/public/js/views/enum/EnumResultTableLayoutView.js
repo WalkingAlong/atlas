@@ -224,8 +224,6 @@ define(['require',
                 var that = this;
                 require(['utils/TableLayout'], function(TableLayout) {
                     var cols = new Backgrid.Columns(that.getBusinessMetadataTableColumns());
-                    console.log('cols---', cols, that.getBusinessMetadataTableColumns());
-                    console.log('commonTableOptions---', that.commonTableOptions);
                     that.REnumResultTableLayoutView.show(new TableLayout(_.extend({}, that.commonTableOptions, {
                         columns: cols
                     })));

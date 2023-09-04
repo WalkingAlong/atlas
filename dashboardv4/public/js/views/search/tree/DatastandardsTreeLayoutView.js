@@ -384,7 +384,6 @@ define([
                 tagValue = name;
                 params['tag'] = tagValue;
             } else {
-                console.log('params---',this.options, params)
                 that.options.value.tag = that.tagId = params["tag"] = null;
                 that.ui.classificationSearchTree.jstree(true).deselect_all(true);
                 if (!that.options.value.type && !that.options.value.tag && !that.options.value.term && !that.options.value.query) {
@@ -394,8 +393,10 @@ define([
                 }
             }
             var searchParam = _.extend({}, this.options.value, params);
-            console.log('params---', searchParam);
-            if(searchParam.tag === '基础数据元') {
+            if(options.node.original.type === 'ENTITY') {
+                let type = searchParam.tag;
+                searchParam.type = type;
+                searchParam.tag = "";
                 this.triggerBasicSearch(searchParam);
             }else {
                 this.triggerSearch(searchParam);
@@ -403,8 +404,6 @@ define([
         },
         triggerBasicSearch: function(params, url) {
             var serachUrl = url ? url : '#!/enumMetaResult';
-            params.type = "hdfs_path";
-            params.tag = "";
             Utils.setUrl({
                 url: serachUrl,
                 urlParams: params,
@@ -529,6 +528,14 @@ define([
                                     isChild = true,
                                     getNodeDetails = generateNode(nodeDetails, options, isChild),
                                     classificationNode = (_.extend(getNodeDetails, nodeProperties));
+                                if(classificationNode.name === '基础数据元') { // TODO: 判断条件可能要修改
+                                    var entityTree = that.getEntityTree();
+                                    entityTree.forEach(item => {
+                                        if(item.name === 'hive') {
+                                            classificationNode.children = [{...item}];
+                                        }
+                                    })
+                                }
                                 data.push(classificationNode);
                                 if (that.isEmptyClassification) {
                                     var isTagEntityCount = _.isNaN(tagEntityCount) ? 0 : tagEntityCount;
@@ -602,7 +609,7 @@ define([
             })
             return list;
         },
-        // TODO: 实体
+        // TODO: 实体tree
         getEntityTree: function() {
             var that = this,
                 serviceTypeArr = [],
@@ -664,7 +671,6 @@ define([
 
                             entityCount = _.isNaN(entityCount) ? 0 : entityCount;
                             generateServiceTypeArr(serviceTypeArr, serviceType, children, entityCount);
-                            console.log('serviceTypeArr---', serviceTypeArr);
                             if (entityCount) {
                                 generateServiceTypeArr(serviceTypeWithEmptyEntity, serviceType, children, entityCount);
                             }
@@ -768,7 +774,6 @@ define([
                 };
             return generateTreeData();
         },
-        // TODO: 实体结束
         pushRootClassificationToJstree: function(data) {
             var that = this;
             _.each(Enums.addOnClassification, function(addOnClassification) {
@@ -828,8 +833,6 @@ define([
                             multiple: false,
                             data: function(node, cb) {
                                 if (node.id === "#") {
-                                    console.log('that.getClassificationTree()---', that.getClassificationTree());
-                                    console.log('that.getEntityTree()---', that.getEntityTree());
                                     cb(that.getClassificationTree());
                                 }
                             }
